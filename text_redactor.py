@@ -1,5 +1,7 @@
+import platform
+
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QFileDialog, QDialog
 import sys
 
 
@@ -29,24 +31,22 @@ class Window(QMainWindow):
     def action_clicked(self):
         action = self.sender()
         if action.text() == 'Открыть':
-            f_name = QFileDialog().getOpenFileName(self)[0]
-
+            f_name = QFileDialog.getOpenFileName(self, "Открыть файл", "/home",
+                                                 options=QFileDialog.DontUseNativeDialog)[0]
             try:
-                f = open(f_name, 'r')
-                with f:
+                with open(f_name, 'r') as f:
                     data = f.read()
                     self.text_edit.setText(data)
             except FileNotFoundError:
                 print("No such file")
 
         elif action.text() == "Сохранить":
-            f_name = QFileDialog.getSaveFileName(self)[0]
-
+            f_name = QFileDialog.getSaveFileName(self, "Сохранить файл", "/home",
+                                                 options=QFileDialog.DontUseNativeDialog)[0]
             try:
-                f = open(f_name, 'w')
-                text = self.text_edit.toPlainText()
-                f.write(text)
-                f.close()
+                with open(f_name, 'w') as f:
+                    text = self.text_edit.toPlainText()
+                    f.write(text)
             except FileNotFoundError:
                 print("No such file")
 
