@@ -1,6 +1,5 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QFileDialog, QDialog
-from colorama import Fore, Back, Style
 import sys
 
 
@@ -17,7 +16,7 @@ class Window(QMainWindow):
         self.menu_bar = QMenuBar(self)
         self.create_menu_bar()
 
-        self.search_dialog = QDialog(self)
+        self.search_dialog = QDialog()
 
     def create_menu_bar(self):
         self.setMenuBar(self.menu_bar)
@@ -54,28 +53,22 @@ class Window(QMainWindow):
 
         elif action.text() == "Найти":
             self.search_dialog.setWindowTitle("Найти")
-            self.search_dialog.resize(500, 200)
+            self.search_dialog.resize(260, 35)
             self.search_dialog.line_edit = QtWidgets.QLineEdit(self.search_dialog)
-            self.search_dialog.line_edit.setGeometry(200, 35, 200, 35)
+            self.search_dialog.line_edit.setGeometry(61, 0, 200, 35)
             self.search_dialog.find_btn = QtWidgets.QPushButton("Найти:", self.search_dialog)
-            self.search_dialog.find_btn.setGeometry(50, 35, 60, 35)
+            self.search_dialog.find_btn.setGeometry(0, 0, 60, 35)
             self.search_dialog.find_btn.clicked.connect(self.find_btn_clicked)
 
             self.search_dialog.exec_()
 
     def find_btn_clicked(self):
-        to_find = self.search_dialog.line_edit.text()
-        text = self.text_edit.toPlainText()
-        text.replace(to_find, Fore.YELLOW + to_find)
-        print("hello " + Back.RED + text)
-
-
-            #find_dialog.
-
-
-
-        """open_file = fileMenu.addMenu("&Открыть")
-        save_file = fileMenu.addMenu("&Сохранить")"""
+        words = self.search_dialog.line_edit.text()
+        if not self.text_edit.find(words):
+            cursor = self.text_edit.textCursor()
+            cursor.setPosition(0)
+            self.text_edit.setTextCursor(cursor)
+            self.text_edit.find(words)
 
 
 def application():
