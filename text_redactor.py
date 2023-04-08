@@ -13,11 +13,17 @@ class Window(QMainWindow):
         self.text_edit = QtWidgets.QTextEdit(self)
         self.setCentralWidget(self.text_edit)
 
+        self.cursor = self.text_edit.textCursor()
+
         self.menu_bar = QMenuBar(self)
         self.create_menu_bar()
 
         self.search_dialog = QDialog()
         self.search_replace_dialog = QDialog()
+
+        self.search_pos = -1
+        self.search_list = []
+        self.search_first = True
 
     def create_menu_bar(self):
         self.setMenuBar(self.menu_bar)
@@ -64,8 +70,8 @@ class Window(QMainWindow):
             self.search_dialog.setWindowTitle("Найти")
             self.search_dialog.resize(260, 35)
             self.search_dialog.line_edit = QtWidgets.QLineEdit(self.search_dialog)
-            self.search_dialog.line_edit.setGeometry(61, 0, 200, 35)
-            self.search_dialog.find_btn = QtWidgets.QPushButton("Найти:", self.search_dialog)
+            self.search_dialog.line_edit.setGeometry(60, 0, 200, 35)
+            self.search_dialog.find_btn = QtWidgets.QPushButton("Найти", self.search_dialog)
             self.search_dialog.find_btn.setGeometry(0, 0, 60, 35)
             self.search_dialog.find_btn.clicked.connect(self.find_btn_clicked)
 
@@ -82,6 +88,7 @@ class Window(QMainWindow):
 
             self.search_replace_dialog.line_edit_1 = QtWidgets.QLineEdit(self.search_replace_dialog)
             self.search_replace_dialog.line_edit_1.setGeometry(115, 15, 300, 35)
+            self.search_replace_dialog.line_edit_1.textChanged.connect(self.enable_btn)
 
             self.search_replace_dialog.replace_label = QtWidgets.QLabel("Заменить на", self.search_replace_dialog)
             self.search_replace_dialog.replace_label.move(10, 80)
@@ -93,24 +100,85 @@ class Window(QMainWindow):
 
             self.search_replace_dialog.search_btn = QtWidgets.QPushButton("Найти", self.search_replace_dialog)
             self.search_replace_dialog.search_btn.setGeometry(365, 125, 50, 35)
+            self.search_replace_dialog.search_btn.setEnabled(False)
+            self.search_replace_dialog.search_btn.clicked.connect(self.search_btn_clicked)
 
             self.search_replace_dialog.replace_btn = QtWidgets.QPushButton("Заменить", self.search_replace_dialog)
             self.search_replace_dialog.replace_btn.setGeometry(280, 125, 75, 35)
+            self.search_replace_dialog.replace_btn.setEnabled(False)
+            self.search_replace_dialog.replace_btn.clicked.connect(self.replace_btn_clicked)
 
             self.search_replace_dialog.replace_all_btn = QtWidgets.QPushButton("Заменить все",
                                                                                self.search_replace_dialog)
             self.search_replace_dialog.replace_all_btn.setGeometry(165, 125, 105, 35)
+            self.search_replace_dialog.replace_all_btn.setEnabled(False)
+            self.search_replace_dialog.replace_all_btn.clicked.connect(self.replace_all_btn_clicked)
 
             self.search_replace_dialog.exec_()
-
 
     def find_btn_clicked(self):
         words = self.search_dialog.line_edit.text()
         if not self.text_edit.find(words):
-            cursor = self.text_edit.textCursor()
-            cursor.setPosition(0)
-            self.text_edit.setTextCursor(cursor)
+            self.cursor.setPosition(0)
+            self.text_edit.setTextCursor(self.cursor)
             self.text_edit.find(words)
+
+    def enable_btn(self, text):
+        self.search_pos = 0
+        self.search_first = True
+        self.cursor.setPosition(0)
+        self.text_edit.setTextCursor(self.cursor)
+        if not text:
+            self.search_replace_dialog.search_btn.setEnabled(False)
+            self.search_replace_dialog.replace_btn.setEnabled(False)
+            self.search_replace_dialog.replace_all_btn.setEnabled(False)
+        else:
+            self.search_replace_dialog.search_btn.setEnabled(True)
+            self.search_replace_dialog.replace_all_btn.setEnabled(True)
+
+    def get_word_pos(self, words):
+        text = self.text_edit.toPlainText()
+        if self.search_first:
+            self.search_pos = text.find(words)
+            self.search_first = False
+        else:
+            pos = text[self.search_pos + len(words):].find(words)
+            if pos == -1:
+                self.search_pos = -1
+            else:
+                self.search_pos = pos + self.search_pos + len(words)
+        return self.search_pos
+
+    def search_btn_clicked(self):
+        self.search_replace_dialog.replace_btn.setEnabled(True)
+        text = self.text_edit.toPlainText()
+        words = self.search_replace_dialog.line_edit_1.text()
+
+        if self.search_pos + len(words) >= len(text) or not self.get_word_pos(words) + 1:
+            self.search_pos = 0
+            self.search_first = True
+            self.get_word_pos(words)
+
+        if not self.text_edit.find(words):
+            self.cursor.setPosition(0)
+            self.text_edit.setTextCursor(self.cursor)
+            if not self.text_edit.find(words):
+                self.search_replace_dialog.replace_btn.setEnabled(False)
+
+    def replace_btn_clicked(self):
+        replace_with = self.search_replace_dialog.line_edit_2.text()
+        replace_what = self.search_replace_dialog.line_edit_1.text()
+        text = self.text_edit.toPlainText()
+        text = text[:self.search_pos] + replace_with + text[self.search_pos + len(replace_what):]
+        self.text_edit.setText(text)
+        self.search_replace_dialog.replace_btn.setEnabled(False)
+
+    def replace_all_btn_clicked(self):
+        replace_with = self.search_replace_dialog.line_edit_2.text()
+        replace_what = self.search_replace_dialog.line_edit_1.text()
+        text = self.text_edit.toPlainText()
+        text = text.replace(replace_what, replace_with)
+        self.text_edit.setText(text)
 
 
 def application():
