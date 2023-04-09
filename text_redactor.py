@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QFileDialog, QDialog
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QFileDialog, QDialog, QShortcut
 import sys
 
 
@@ -15,14 +16,22 @@ class Window(QMainWindow):
 
         self.cursor = self.text_edit.textCursor()
 
+        self.action_open = QtWidgets.QAction()
+        self.action_save = QtWidgets.QAction()
+        self.action_save_as = QtWidgets.QAction()
+        self.action_new = QtWidgets.QAction()
+        self.action_find = QtWidgets.QAction()
+        self.action_find_replace = QtWidgets.QAction()
+
         self.menu_bar = QMenuBar(self)
         self.create_menu_bar()
+
+        self.f_name = ''
 
         self.search_dialog = QDialog()
         self.search_replace_dialog = QDialog()
 
         self.search_pos = -1
-        self.search_list = []
         self.search_first = True
 
     def create_menu_bar(self):
@@ -34,87 +43,124 @@ class Window(QMainWindow):
         find_menu = QMenu("&Найти", self)
         self.menu_bar.addMenu(find_menu)
 
-        file_menu.addAction("Открыть", self.file_menu_action_clicked)
-        file_menu.addAction("Сохранить", self.file_menu_action_clicked)
+        file_menu.addAction(self.action_new)
+        self.action_new.setText("Новый")
+        self.action_new.setShortcut(QKeySequence.New)
+        self.action_new.triggered.connect(self.new_file)
 
-        find_menu.addAction("Найти", self.find_menu_action_clicked)
-        find_menu.addAction("Найти и заменить", self.find_menu_action_clicked)
+        file_menu.addAction(self.action_open)
+        self.action_open.setText("Открыть")
+        self.action_open.setShortcut(QKeySequence.Open)
+        self.action_open.triggered.connect(self.open_file)
 
-    @QtCore.pyqtSlot()
-    def file_menu_action_clicked(self):
-        action = self.sender()
-        if action.text() == "Открыть":
-            f_name = QFileDialog.getOpenFileName(self, "Открыть файл", "/home",
-                                                 options=QFileDialog.DontUseNativeDialog)[0]
+        file_menu.addAction(self.action_save)
+        self.action_save.setText("Сохранить")
+        self.action_save.setShortcut(QKeySequence.Save)
+        self.action_save.triggered.connect(self.save_file)
+
+        file_menu.addAction(self.action_save_as)
+        self.action_save_as.setText("Сохранить как...")
+        self.action_save_as.setShortcut(QKeySequence.SaveAs)
+        self.action_save_as.triggered.connect(self.save_file_as)
+
+        find_menu.addAction(self.action_find)
+        self.action_find.setText("Найти")
+        self.action_find.setShortcut(QKeySequence.Find)
+        self.action_find.triggered.connect(self.find)
+
+        find_menu.addAction(self.action_find_replace)
+        self.action_find_replace.setText("Найти и заменить")
+        self.action_find_replace.setShortcut(QKeySequence.Replace)
+        self.action_find_replace.triggered.connect(self.find_replace)
+
+    def open_file(self):
+        self.f_name = QFileDialog.getOpenFileName(self, "Открыть файл", "/home",
+                                                  options=QFileDialog.DontUseNativeDialog)[0]
+        try:
+            with open(self.f_name, 'r') as f:
+                data = f.read()
+                self.text_edit.setText(data)
+        except FileNotFoundError:
+            print("No such file")
+
+    def save_file(self):
+        if self.f_name == '':
+            self.f_name = QFileDialog.getSaveFileName(self, "Сохранить файл", "/home",
+                                                      options=QFileDialog.DontUseNativeDialog)[0]
             try:
-                with open(f_name, 'r') as f:
-                    data = f.read()
-                    self.text_edit.setText(data)
-            except FileNotFoundError:
-                print("No such file")
-
-        elif action.text() == "Сохранить":
-            f_name = QFileDialog.getSaveFileName(self, "Сохранить файл", "/home",
-                                                 options=QFileDialog.DontUseNativeDialog)[0]
-            try:
-                with open(f_name, 'w') as f:
+                with open(self.f_name, 'w') as f:
                     text = self.text_edit.toPlainText()
                     f.write(text)
             except FileNotFoundError:
                 print("No such file")
+        else:
+            with open(self.f_name, 'w') as f:
+                text = self.text_edit.toPlainText()
+                f.write(text)
 
-    @QtCore.pyqtSlot()
-    def find_menu_action_clicked(self):
-        action = self.sender()
-        if action.text() == "Найти":
-            self.search_dialog.setWindowTitle("Найти")
-            self.search_dialog.resize(260, 35)
-            self.search_dialog.line_edit = QtWidgets.QLineEdit(self.search_dialog)
-            self.search_dialog.line_edit.setGeometry(60, 0, 200, 35)
-            self.search_dialog.find_btn = QtWidgets.QPushButton("Найти", self.search_dialog)
-            self.search_dialog.find_btn.setGeometry(0, 0, 60, 35)
-            self.search_dialog.find_btn.clicked.connect(self.find_btn_clicked)
+    def save_file_as(self):
+        self.f_name = QFileDialog.getSaveFileName(self, "Сохранить файл", "/home",
+                                                  options=QFileDialog.DontUseNativeDialog)[0]
+        try:
+            with open(self.f_name, 'w') as f:
+                text = self.text_edit.toPlainText()
+                f.write(text)
+        except FileNotFoundError:
+            print("No such file")
 
-            self.search_dialog.exec_()
+    def new_file(self):
+        self.f_name = ''
+        self.text_edit.clear()
 
-        elif action.text() == "Найти и заменить":
-            self.search_replace_dialog.setWindowTitle("Найти и заменить")
-            self.search_replace_dialog.resize(450, 175)
+    def find(self):
+        self.search_dialog.setWindowTitle("Найти")
+        self.search_dialog.resize(260, 35)
+        self.search_dialog.line_edit = QtWidgets.QLineEdit(self.search_dialog)
+        self.search_dialog.line_edit.setGeometry(60, 0, 200, 35)
+        self.search_dialog.find_btn = QtWidgets.QPushButton("Найти", self.search_dialog)
+        self.search_dialog.find_btn.setGeometry(0, 0, 60, 35)
+        self.search_dialog.find_btn.clicked.connect(self.find_btn_clicked)
 
-            self.search_replace_dialog.search_label = QtWidgets.QLabel("Найти", self.search_replace_dialog)
-            self.search_replace_dialog.search_label.move(55, 25)
-            self.search_replace_dialog.search_label.resize(35, 35)
-            self.search_replace_dialog.search_label.adjustSize()
+        self.search_dialog.exec_()
 
-            self.search_replace_dialog.line_edit_1 = QtWidgets.QLineEdit(self.search_replace_dialog)
-            self.search_replace_dialog.line_edit_1.setGeometry(115, 15, 300, 35)
-            self.search_replace_dialog.line_edit_1.textChanged.connect(self.enable_btn)
+    def find_replace(self):
+        self.search_replace_dialog.setWindowTitle("Найти и заменить")
+        self.search_replace_dialog.resize(450, 175)
 
-            self.search_replace_dialog.replace_label = QtWidgets.QLabel("Заменить на", self.search_replace_dialog)
-            self.search_replace_dialog.replace_label.move(10, 80)
-            self.search_replace_dialog.replace_label.resize(35, 35)
-            self.search_replace_dialog.replace_label.adjustSize()
+        self.search_replace_dialog.search_label = QtWidgets.QLabel("Найти", self.search_replace_dialog)
+        self.search_replace_dialog.search_label.move(55, 25)
+        self.search_replace_dialog.search_label.resize(35, 35)
+        self.search_replace_dialog.search_label.adjustSize()
 
-            self.search_replace_dialog.line_edit_2 = QtWidgets.QLineEdit(self.search_replace_dialog)
-            self.search_replace_dialog.line_edit_2.setGeometry(115, 70, 300, 35)
+        self.search_replace_dialog.line_edit_1 = QtWidgets.QLineEdit(self.search_replace_dialog)
+        self.search_replace_dialog.line_edit_1.setGeometry(115, 15, 300, 35)
+        self.search_replace_dialog.line_edit_1.textChanged.connect(self.enable_btn)
 
-            self.search_replace_dialog.search_btn = QtWidgets.QPushButton("Найти", self.search_replace_dialog)
-            self.search_replace_dialog.search_btn.setGeometry(365, 125, 50, 35)
-            self.search_replace_dialog.search_btn.setEnabled(False)
-            self.search_replace_dialog.search_btn.clicked.connect(self.search_btn_clicked)
+        self.search_replace_dialog.replace_label = QtWidgets.QLabel("Заменить на", self.search_replace_dialog)
+        self.search_replace_dialog.replace_label.move(10, 80)
+        self.search_replace_dialog.replace_label.resize(35, 35)
+        self.search_replace_dialog.replace_label.adjustSize()
 
-            self.search_replace_dialog.replace_btn = QtWidgets.QPushButton("Заменить", self.search_replace_dialog)
-            self.search_replace_dialog.replace_btn.setGeometry(280, 125, 75, 35)
-            self.search_replace_dialog.replace_btn.setEnabled(False)
-            self.search_replace_dialog.replace_btn.clicked.connect(self.replace_btn_clicked)
+        self.search_replace_dialog.line_edit_2 = QtWidgets.QLineEdit(self.search_replace_dialog)
+        self.search_replace_dialog.line_edit_2.setGeometry(115, 70, 300, 35)
 
-            self.search_replace_dialog.replace_all_btn = QtWidgets.QPushButton("Заменить все",
-                                                                               self.search_replace_dialog)
-            self.search_replace_dialog.replace_all_btn.setGeometry(165, 125, 105, 35)
-            self.search_replace_dialog.replace_all_btn.setEnabled(False)
-            self.search_replace_dialog.replace_all_btn.clicked.connect(self.replace_all_btn_clicked)
+        self.search_replace_dialog.search_btn = QtWidgets.QPushButton("Найти", self.search_replace_dialog)
+        self.search_replace_dialog.search_btn.setGeometry(365, 125, 50, 35)
+        self.search_replace_dialog.search_btn.setEnabled(False)
+        self.search_replace_dialog.search_btn.clicked.connect(self.search_btn_clicked)
 
-            self.search_replace_dialog.exec_()
+        self.search_replace_dialog.replace_btn = QtWidgets.QPushButton("Заменить", self.search_replace_dialog)
+        self.search_replace_dialog.replace_btn.setGeometry(280, 125, 75, 35)
+        self.search_replace_dialog.replace_btn.setEnabled(False)
+        self.search_replace_dialog.replace_btn.clicked.connect(self.replace_btn_clicked)
+
+        self.search_replace_dialog.replace_all_btn = QtWidgets.QPushButton("Заменить все",
+                                                                           self.search_replace_dialog)
+        self.search_replace_dialog.replace_all_btn.setGeometry(165, 125, 105, 35)
+        self.search_replace_dialog.replace_all_btn.setEnabled(False)
+        self.search_replace_dialog.replace_all_btn.clicked.connect(self.replace_all_btn_clicked)
+
+        self.search_replace_dialog.exec_()
 
     def find_btn_clicked(self):
         words = self.search_dialog.line_edit.text()
