@@ -1,6 +1,6 @@
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QFileDialog, QDialog, QShortcut
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QFileDialog, QDialog, QMessageBox
 import sys
 
 
@@ -15,6 +15,7 @@ class Window(QMainWindow):
         self.setCentralWidget(self.text_edit)
 
         self.cursor = self.text_edit.textCursor()
+        self.text_edit.setTextCursor(self.cursor)
 
         self.action_open = QtWidgets.QAction()
         self.action_save = QtWidgets.QAction()
@@ -22,6 +23,11 @@ class Window(QMainWindow):
         self.action_new = QtWidgets.QAction()
         self.action_find = QtWidgets.QAction()
         self.action_find_replace = QtWidgets.QAction()
+        self.action_quit = QtWidgets.QAction()
+        self.action_cut = QtWidgets.QAction()
+        self.action_copy = QtWidgets.QAction()
+        self.action_paste = QtWidgets.QAction()
+        self.action_delete = QtWidgets.QAction()
 
         self.menu_bar = QMenuBar(self)
         self.create_menu_bar()
@@ -31,17 +37,14 @@ class Window(QMainWindow):
         self.search_dialog = QDialog()
         self.search_replace_dialog = QDialog()
 
-        self.search_pos = -1
-        self.search_first = True
-
     def create_menu_bar(self):
         self.setMenuBar(self.menu_bar)
 
         file_menu = QMenu("&Файл", self)
         self.menu_bar.addMenu(file_menu)
 
-        find_menu = QMenu("&Найти", self)
-        self.menu_bar.addMenu(find_menu)
+        edit_menu = QMenu("&Правка", self)
+        self.menu_bar.addMenu(edit_menu)
 
         file_menu.addAction(self.action_new)
         self.action_new.setText("Новый")
@@ -53,6 +56,8 @@ class Window(QMainWindow):
         self.action_open.setShortcut(QKeySequence.Open)
         self.action_open.triggered.connect(self.open_file)
 
+        file_menu.addSeparator()
+
         file_menu.addAction(self.action_save)
         self.action_save.setText("Сохранить")
         self.action_save.setShortcut(QKeySequence.Save)
@@ -63,12 +68,43 @@ class Window(QMainWindow):
         self.action_save_as.setShortcut(QKeySequence.SaveAs)
         self.action_save_as.triggered.connect(self.save_file_as)
 
-        find_menu.addAction(self.action_find)
+        file_menu.addSeparator()
+
+        file_menu.addAction(self.action_quit)
+        self.action_quit.setText("Выйти")
+        self.action_quit.setShortcut(QKeySequence.Quit)
+        self.action_quit.triggered.connect(self.quit)
+
+        edit_menu.addAction(self.action_cut)
+        self.action_cut.setText("Вырезать")
+        self.action_cut.setShortcut(QKeySequence.Cut)
+        self.action_cut.triggered.connect(self.cut)
+
+        edit_menu.addAction(self.action_copy)
+        self.action_copy.setText("Копировать")
+        self.action_copy.setShortcut(QKeySequence.Copy)
+        self.action_copy.triggered.connect(self.copy)
+
+        edit_menu.addAction(self.action_paste)
+        self.action_paste.setText("Вставить")
+        self.action_paste.setShortcut(QKeySequence.Paste)
+        self.action_paste.triggered.connect(self.paste)
+
+        edit_menu.addSeparator()
+
+        edit_menu.addAction(self.action_delete)
+        self.action_delete.setText("Удалить")
+        self.action_delete.setShortcut(QKeySequence.Delete)
+        self.action_delete.triggered.connect(self.delete)
+
+        edit_menu.addSeparator()
+
+        edit_menu.addAction(self.action_find)
         self.action_find.setText("Найти")
         self.action_find.setShortcut(QKeySequence.Find)
-        self.action_find.triggered.connect(self.find)
+        self.action_find.triggered.connect(self.find_)
 
-        find_menu.addAction(self.action_find_replace)
+        edit_menu.addAction(self.action_find_replace)
         self.action_find_replace.setText("Найти и заменить")
         self.action_find_replace.setShortcut(QKeySequence.Replace)
         self.action_find_replace.triggered.connect(self.find_replace)
@@ -82,6 +118,17 @@ class Window(QMainWindow):
                 self.text_edit.setText(data)
         except FileNotFoundError:
             print("No such file")
+        except PermissionError:
+            self.f_name = ''
+            error = QMessageBox()
+            error.setWindowTitle("Ошибка")
+            error.setText("Не удалось сохранить файл. "
+                          "Недостаточно прав для сохранения файла. "
+                          "Убедитесь в правильности указанного адреса и попробуйте еще раз.")
+            error.setIcon(QMessageBox.Warning)
+            error.setStandardButtons(QMessageBox.Ok)
+
+            error.exec_()
 
     def save_file(self):
         if self.f_name == '':
@@ -93,6 +140,17 @@ class Window(QMainWindow):
                     f.write(text)
             except FileNotFoundError:
                 print("No such file")
+            except PermissionError:
+                self.f_name = ''
+                error = QMessageBox()
+                error.setWindowTitle("Ошибка")
+                error.setText("Не удалось сохранить файл. "
+                              "Недостаточно прав для сохранения файла. "
+                              "Убедитесь в правильности указанного адреса и попробуйте еще раз.")
+                error.setIcon(QMessageBox.Warning)
+                error.setStandardButtons(QMessageBox.Ok)
+
+                error.exec_()
         else:
             with open(self.f_name, 'w') as f:
                 text = self.text_edit.toPlainText()
@@ -107,12 +165,35 @@ class Window(QMainWindow):
                 f.write(text)
         except FileNotFoundError:
             print("No such file")
+        except PermissionError:
+            self.f_name = ''
+            error = QMessageBox()
+            error.setWindowTitle("Ошибка")
+            error.setText("Не удалось сохранить файл. "
+                          "Недостаточно прав для сохранения файла. "
+                          "Убедитесь в правильности указанного адреса и попробуйте еще раз.")
+            error.setIcon(QMessageBox.Warning)
+            error.setStandardButtons(QMessageBox.Ok)
+
+            error.exec_()
 
     def new_file(self):
         self.f_name = ''
         self.text_edit.clear()
 
-    def find(self):
+    def cut(self):
+        self.text_edit.cut()
+
+    def copy(self):
+        self.text_edit.copy()
+
+    def paste(self):
+        self.text_edit.paste()
+
+    def delete(self):
+        self.text_edit.textCursor().removeSelectedText()
+
+    def find_(self):
         self.search_dialog.setWindowTitle("Найти")
         self.search_dialog.resize(260, 35)
         self.search_dialog.line_edit = QtWidgets.QLineEdit(self.search_dialog)
@@ -170,10 +251,6 @@ class Window(QMainWindow):
             self.text_edit.find(words)
 
     def enable_btn(self, text):
-        self.search_pos = 0
-        self.search_first = True
-        self.cursor.setPosition(0)
-        self.text_edit.setTextCursor(self.cursor)
         if not text:
             self.search_replace_dialog.search_btn.setEnabled(False)
             self.search_replace_dialog.replace_btn.setEnabled(False)
@@ -182,29 +259,9 @@ class Window(QMainWindow):
             self.search_replace_dialog.search_btn.setEnabled(True)
             self.search_replace_dialog.replace_all_btn.setEnabled(True)
 
-    def get_word_pos(self, words):
-        text = self.text_edit.toPlainText()
-        if self.search_first:
-            self.search_pos = text.find(words)
-            self.search_first = False
-        else:
-            pos = text[self.search_pos + len(words):].find(words)
-            if pos == -1:
-                self.search_pos = -1
-            else:
-                self.search_pos = pos + self.search_pos + len(words)
-        return self.search_pos
-
     def search_btn_clicked(self):
         self.search_replace_dialog.replace_btn.setEnabled(True)
-        text = self.text_edit.toPlainText()
         words = self.search_replace_dialog.line_edit_1.text()
-
-        if self.search_pos + len(words) >= len(text) or not self.get_word_pos(words) + 1:
-            self.search_pos = 0
-            self.search_first = True
-            self.get_word_pos(words)
-
         if not self.text_edit.find(words):
             self.cursor.setPosition(0)
             self.text_edit.setTextCursor(self.cursor)
@@ -213,10 +270,8 @@ class Window(QMainWindow):
 
     def replace_btn_clicked(self):
         replace_with = self.search_replace_dialog.line_edit_2.text()
-        replace_what = self.search_replace_dialog.line_edit_1.text()
-        text = self.text_edit.toPlainText()
-        text = text[:self.search_pos] + replace_with + text[self.search_pos + len(replace_what):]
-        self.text_edit.setText(text)
+        self.text_edit.textCursor().removeSelectedText()
+        self.text_edit.textCursor().insertText(replace_with)
         self.search_replace_dialog.replace_btn.setEnabled(False)
 
     def replace_all_btn_clicked(self):
@@ -225,6 +280,9 @@ class Window(QMainWindow):
         text = self.text_edit.toPlainText()
         text = text.replace(replace_what, replace_with)
         self.text_edit.setText(text)
+
+    def quit(self):
+        self.close()
 
 
 def application():
