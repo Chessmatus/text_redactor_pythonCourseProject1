@@ -201,7 +201,7 @@ class Window(QMainWindow):
         self.dark_mode.triggered.connect(self.dark_m)
 
     def open_file(self):
-        self.f_name = QFileDialog.getOpenFileName(self, "Открыть файл",
+        self.f_name = QFileDialog.getOpenFileName(self, "Открыть файл", filter='Text files (*.txt)',
                                                   options=QFileDialog.DontUseNativeDialog)[0]
         try:
             with open(self.f_name, 'r') as f:
@@ -225,7 +225,7 @@ class Window(QMainWindow):
 
     def save_file(self):
         if self.f_name == '':
-            self.f_name = QFileDialog.getSaveFileName(self, "Сохранить файл",
+            self.f_name = QFileDialog.getSaveFileName(self, "Сохранить файл", filter='Text files (*.txt)',
                                                       options=QFileDialog.DontUseNativeDialog)[0]
             try:
                 with open(self.f_name, 'w') as f:
@@ -250,7 +250,7 @@ class Window(QMainWindow):
                 f.write(text)
 
     def save_file_as(self):
-        self.f_name = QFileDialog.getSaveFileName(self, "Сохранить файл",
+        self.f_name = QFileDialog.getSaveFileName(self, "Сохранить файл", filter='Text files (*.txt)',
                                                   options=QFileDialog.DontUseNativeDialog)[0]
         try:
             with open(self.f_name, 'w') as f:
