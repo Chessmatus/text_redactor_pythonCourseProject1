@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtGui import QKeySequence, QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QFileDialog, QDialog, QMessageBox
 import sys
 
@@ -29,6 +29,24 @@ class Window(QMainWindow):
         self.action_paste = QtWidgets.QAction()
         self.action_delete = QtWidgets.QAction()
 
+        self.text_red = QtWidgets.QAction()
+        self.text_black = QtWidgets.QAction()
+        self.text_white = QtWidgets.QAction()
+        self.text_yellow = QtWidgets.QAction()
+        self.text_blue = QtWidgets.QAction()
+        self.text_green = QtWidgets.QAction()
+        self.text_grey = QtWidgets.QAction()
+
+        self.back_red = QtWidgets.QAction()
+        self.back_black = QtWidgets.QAction()
+        self.back_white = QtWidgets.QAction()
+        self.back_yellow = QtWidgets.QAction()
+        self.back_blue = QtWidgets.QAction()
+        self.back_green = QtWidgets.QAction()
+        self.back_grey = QtWidgets.QAction()
+        self.light_mode = QtWidgets.QAction()
+        self.dark_mode = QtWidgets.QAction()
+
         self.menu_bar = QMenuBar(self)
         self.create_menu_bar()
 
@@ -45,6 +63,15 @@ class Window(QMainWindow):
 
         edit_menu = QMenu("&Правка", self)
         self.menu_bar.addMenu(edit_menu)
+
+        view_menu = QMenu("&Вид", self)
+        self.menu_bar.addMenu(view_menu)
+        text_color = QMenu("&Цвет текста", self)
+        view_menu.addMenu(text_color)
+        back_color = QMenu("&Фон текста", self)
+        view_menu.addMenu(back_color)
+        back = QMenu("&Фон", self)
+        view_menu.addMenu(back)
 
         file_menu.addAction(self.action_new)
         self.action_new.setText("Новый")
@@ -109,11 +136,77 @@ class Window(QMainWindow):
         self.action_find_replace.setShortcut(QKeySequence.Replace)
         self.action_find_replace.triggered.connect(self.find_replace)
 
+        text_color.addAction(self.text_black)
+        self.text_black.setText("Черный")
+        self.text_black.triggered.connect(self.t_black)
+
+        text_color.addAction(self.text_red)
+        self.text_red.setText("Красный")
+        self.text_red.triggered.connect(self.t_red)
+
+        text_color.addAction(self.text_blue)
+        self.text_blue.setText("Синий")
+        self.text_blue.triggered.connect(self.t_blue)
+
+        text_color.addAction(self.text_green)
+        self.text_green.setText("Зеленый")
+        self.text_green.triggered.connect(self.t_green)
+
+        text_color.addAction(self.text_yellow)
+        self.text_yellow.setText("Желтый")
+        self.text_yellow.triggered.connect(self.t_yellow)
+
+        text_color.addAction(self.text_white)
+        self.text_white.setText("Белый")
+        self.text_white.triggered.connect(self.t_white)
+
+        text_color.addAction(self.text_grey)
+        self.text_grey.setText("Серый")
+        self.text_grey.triggered.connect(self.t_grey)
+
+        back_color.addAction(self.back_black)
+        self.back_black.setText("Черный")
+        self.back_black.triggered.connect(self.b_black)
+
+        back_color.addAction(self.back_red)
+        self.back_red.setText("Красный")
+        self.back_red.triggered.connect(self.b_red)
+
+        back_color.addAction(self.back_blue)
+        self.back_blue.setText("Синий")
+        self.back_blue.triggered.connect(self.b_blue)
+
+        back_color.addAction(self.back_green)
+        self.back_green.setText("Зеленый")
+        self.back_green.triggered.connect(self.b_green)
+
+        back_color.addAction(self.back_yellow)
+        self.back_yellow.setText("Желтый")
+        self.back_yellow.triggered.connect(self.b_yellow)
+
+        back_color.addAction(self.back_white)
+        self.back_white.setText("Белый")
+        self.back_white.triggered.connect(self.b_white)
+
+        back_color.addAction(self.back_grey)
+        self.back_grey.setText("Серый")
+        self.back_grey.triggered.connect(self.b_grey)
+
+        back.addAction(self.light_mode)
+        self.light_mode.setText("Светлый")
+        self.light_mode.triggered.connect(self.light_m)
+
+        back.addAction(self.dark_mode)
+        self.dark_mode.setText("Темный")
+        self.dark_mode.triggered.connect(self.dark_m)
+
     def open_file(self):
-        self.f_name = QFileDialog.getOpenFileName(self, "Открыть файл", "/home",
+        self.f_name = QFileDialog.getOpenFileName(self, "Открыть файл",
                                                   options=QFileDialog.DontUseNativeDialog)[0]
         try:
             with open(self.f_name, 'r') as f:
+                self.text_edit.setTextColor(QColor("black"))
+                self.text_edit.setTextBackgroundColor(QColor("white"))
                 data = f.read()
                 self.text_edit.setText(data)
         except FileNotFoundError:
@@ -132,7 +225,7 @@ class Window(QMainWindow):
 
     def save_file(self):
         if self.f_name == '':
-            self.f_name = QFileDialog.getSaveFileName(self, "Сохранить файл", "/home",
+            self.f_name = QFileDialog.getSaveFileName(self, "Сохранить файл",
                                                       options=QFileDialog.DontUseNativeDialog)[0]
             try:
                 with open(self.f_name, 'w') as f:
@@ -157,7 +250,7 @@ class Window(QMainWindow):
                 f.write(text)
 
     def save_file_as(self):
-        self.f_name = QFileDialog.getSaveFileName(self, "Сохранить файл", "/home",
+        self.f_name = QFileDialog.getSaveFileName(self, "Сохранить файл",
                                                   options=QFileDialog.DontUseNativeDialog)[0]
         try:
             with open(self.f_name, 'w') as f:
@@ -180,6 +273,8 @@ class Window(QMainWindow):
     def new_file(self):
         self.f_name = ''
         self.text_edit.clear()
+        self.text_edit.setTextColor(QColor("black"))
+        self.text_edit.setTextBackgroundColor(QColor("white"))
 
     def cut(self):
         self.text_edit.cut()
@@ -280,6 +375,54 @@ class Window(QMainWindow):
         text = self.text_edit.toPlainText()
         text = text.replace(replace_what, replace_with)
         self.text_edit.setText(text)
+
+    def t_black(self):
+        self.text_edit.setTextColor(QColor("black"))
+
+    def t_red(self):
+        self.text_edit.setTextColor(QColor("red"))
+
+    def t_blue(self):
+        self.text_edit.setTextColor(QColor("blue"))
+
+    def t_white(self):
+        self.text_edit.setTextColor(QColor("white"))
+
+    def t_green(self):
+        self.text_edit.setTextColor(QColor("green"))
+
+    def t_yellow(self):
+        self.text_edit.setTextColor(QColor("yellow"))
+
+    def t_grey(self):
+        self.text_edit.setTextColor(QColor("grey"))
+
+    def b_black(self):
+        self.text_edit.setTextBackgroundColor(QColor("black"))
+
+    def b_red(self):
+        self.text_edit.setTextBackgroundColor(QColor("red"))
+
+    def b_blue(self):
+        self.text_edit.setTextBackgroundColor(QColor("blue"))
+
+    def b_white(self):
+        self.text_edit.setTextBackgroundColor(QColor("white"))
+
+    def b_green(self):
+        self.text_edit.setTextBackgroundColor(QColor("green"))
+
+    def b_yellow(self):
+        self.text_edit.setTextBackgroundColor(QColor("yellow"))
+
+    def b_grey(self):
+        self.text_edit.setTextBackgroundColor(QColor("grey"))
+
+    def light_m(self):
+        self.setStyleSheet('''QTextEdit{background-color: #FFFFFF; color: #000000}''')
+
+    def dark_m(self):
+        self.setStyleSheet('''QTextEdit{background-color: #000000; color: #FFFFFF}''')
 
     def quit(self):
         self.close()
