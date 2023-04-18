@@ -17,6 +17,10 @@ class Window(QMainWindow):
         self.cursor = self.text_edit.textCursor()
         self.text_edit.setTextCursor(self.cursor)
 
+        self.file_menu = QMenu()
+        self.edit_menu = QMenu()
+        self.view_menu = QMenu()
+
         self.action_open = QtWidgets.QAction()
         self.action_save = QtWidgets.QAction()
         self.action_save_as = QtWidgets.QAction()
@@ -55,86 +59,47 @@ class Window(QMainWindow):
         self.search_dialog = QDialog()
         self.search_replace_dialog = QDialog()
 
+    @staticmethod
+    def add_action(menu, action, name, short_cut, connect):
+        action.setText(name)
+        action.setShortcut(short_cut)
+        action.triggered.connect(connect)
+        menu.addAction(action)
+
     def create_menu_bar(self):
         self.setMenuBar(self.menu_bar)
 
-        file_menu = QMenu("&Файл", self)
-        self.menu_bar.addMenu(file_menu)
+        self.file_menu = QMenu("&Файл", self)
+        self.menu_bar.addMenu(self.file_menu)
 
-        edit_menu = QMenu("&Правка", self)
-        self.menu_bar.addMenu(edit_menu)
+        self.edit_menu = QMenu("&Правка", self)
+        self.menu_bar.addMenu(self.edit_menu)
 
-        view_menu = QMenu("&Вид", self)
-        self.menu_bar.addMenu(view_menu)
+        self.view_menu = QMenu("&Вид", self)
+        self.menu_bar.addMenu(self.view_menu)
         text_color = QMenu("&Цвет текста", self)
-        view_menu.addMenu(text_color)
+        self.view_menu.addMenu(text_color)
         back_color = QMenu("&Фон текста", self)
-        view_menu.addMenu(back_color)
+        self.view_menu.addMenu(back_color)
         back = QMenu("&Фон", self)
-        view_menu.addMenu(back)
+        self.view_menu.addMenu(back)
 
-        file_menu.addAction(self.action_new)
-        self.action_new.setText("Новый")
-        self.action_new.setShortcut(QKeySequence.New)
-        self.action_new.triggered.connect(self.new_file)
-
-        file_menu.addAction(self.action_open)
-        self.action_open.setText("Открыть")
-        self.action_open.setShortcut(QKeySequence.Open)
-        self.action_open.triggered.connect(self.open_file)
-
-        file_menu.addSeparator()
-
-        file_menu.addAction(self.action_save)
-        self.action_save.setText("Сохранить")
-        self.action_save.setShortcut(QKeySequence.Save)
-        self.action_save.triggered.connect(self.save_file)
-
-        file_menu.addAction(self.action_save_as)
-        self.action_save_as.setText("Сохранить как...")
-        self.action_save_as.setShortcut(QKeySequence.SaveAs)
-        self.action_save_as.triggered.connect(self.save_file_as)
-
-        file_menu.addSeparator()
-
-        file_menu.addAction(self.action_quit)
-        self.action_quit.setText("Выйти")
-        self.action_quit.setShortcut(QKeySequence.Quit)
-        self.action_quit.triggered.connect(self.quit)
-
-        edit_menu.addAction(self.action_cut)
-        self.action_cut.setText("Вырезать")
-        self.action_cut.setShortcut(QKeySequence.Cut)
-        self.action_cut.triggered.connect(self.cut)
-
-        edit_menu.addAction(self.action_copy)
-        self.action_copy.setText("Копировать")
-        self.action_copy.setShortcut(QKeySequence.Copy)
-        self.action_copy.triggered.connect(self.copy)
-
-        edit_menu.addAction(self.action_paste)
-        self.action_paste.setText("Вставить")
-        self.action_paste.setShortcut(QKeySequence.Paste)
-        self.action_paste.triggered.connect(self.paste)
-
-        edit_menu.addSeparator()
-
-        edit_menu.addAction(self.action_delete)
-        self.action_delete.setText("Удалить")
-        self.action_delete.setShortcut(QKeySequence.Delete)
-        self.action_delete.triggered.connect(self.delete)
-
-        edit_menu.addSeparator()
-
-        edit_menu.addAction(self.action_find)
-        self.action_find.setText("Найти")
-        self.action_find.setShortcut(QKeySequence.Find)
-        self.action_find.triggered.connect(self.find_)
-
-        edit_menu.addAction(self.action_find_replace)
-        self.action_find_replace.setText("Найти и заменить")
-        self.action_find_replace.setShortcut(QKeySequence.Replace)
-        self.action_find_replace.triggered.connect(self.find_replace)
+        self.add_action(self.file_menu, self.action_new, "Новый", QKeySequence.New, self.new_file)
+        self.add_action(self.file_menu, self.action_open, "Открыть", QKeySequence.Open, self.open_file)
+        self.file_menu.addSeparator()
+        self.add_action(self.file_menu, self.action_save, "Сохранить", QKeySequence.Save, self.save_file)
+        self.add_action(self.file_menu, self.action_save_as, "Сохранить как...", QKeySequence.SaveAs, self.save_file_as)
+        self.file_menu.addSeparator()
+        self.add_action(self.file_menu, self.action_quit, "Выйти", QKeySequence.Quit, self.quit)
+        self.add_action(self.edit_menu, self.action_cut, "Вырезать", QKeySequence.Cut, self.cut)
+        self.add_action(self.edit_menu, self.action_copy, "Копировать", QKeySequence.Copy, self.copy)
+        self.add_action(self.edit_menu, self.action_paste, "Вставить", QKeySequence.Paste, self.paste)
+        self.edit_menu.addSeparator()
+        self.add_action(self.edit_menu, self.action_delete, "Удалить", QKeySequence.Delete, self.delete)
+        self.edit_menu.addSeparator()
+        self.add_action(self.edit_menu, self.action_find, "Найти", QKeySequence.Find, self.find_)
+        self.add_action(self.edit_menu, self.action_find_replace, "Найти и заменить", QKeySequence.Replace,
+                        self.find_replace)
 
         text_color.addAction(self.text_black)
         self.text_black.setText("Черный")
