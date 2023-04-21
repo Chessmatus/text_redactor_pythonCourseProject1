@@ -18,6 +18,15 @@
 ![Интерфейс приложения](https://github.com/Chessmatus/project_01/blob/dev/screenshot_3.png) 
 
 2. Запуск приложения:
-   * Из файла Window.py
+
+   Выполнить в консоли:
+   
+   ```
+   git clone https://github.com/Chessmatus/project_01.git 
+   cd project_01
+   git checkout -b dev origin/dev
+   pip install -r requirements.txt
+   python3 window.py
+   
 3. Замечания:
    * Использовалась библиотека PyQT5. [Ссылка на документацию](https://doc.qt.io/qtforpython/).
