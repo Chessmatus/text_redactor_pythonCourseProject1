@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMenu, QDialog
-from PyQt5.QtGui import QKeySequence, QColor
+from PyQt5.QtWidgets import QMenu
+from PyQt5.QtGui import QColor
 
 
 class TextColor(QMenu):

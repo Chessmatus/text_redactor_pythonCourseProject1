@@ -30,6 +30,8 @@ class EditMenu(QMenu):
         self.search_dialog = QDialog()
         self.search_replace_dialog = QDialog()
 
+        self.is_find_btn_clicked = False
+
     def add_action(self, action, name, shortcut, connect):
         action.setText(name)
         action.setShortcut(shortcut)
@@ -55,9 +57,13 @@ class EditMenu(QMenu):
         self.search_dialog.line_edit.setGeometry(60, 0, 200, 35)
         self.search_dialog.find_btn = QtWidgets.QPushButton("Найти", self.search_dialog)
         self.search_dialog.find_btn.setGeometry(0, 0, 60, 35)
+        self.search_dialog.line_edit.textChanged.connect(self.is_f_clicked_btn)
         self.search_dialog.find_btn.clicked.connect(self.find_btn_clicked)
 
         self.search_dialog.exec_()
+
+    def is_f_clicked_btn(self):
+        self.is_find_btn_clicked = False
 
     def find_replace(self):
         self.search_replace_dialog.setWindowTitle("Найти и заменить")
@@ -99,6 +105,7 @@ class EditMenu(QMenu):
         self.search_replace_dialog.exec_()
 
     def find_btn_clicked(self):
+        self.is_find_btn_clicked = True
         words = self.search_dialog.line_edit.text()
         if not self.window.text_edit.find(words):
             self.window.cursor.setPosition(0)

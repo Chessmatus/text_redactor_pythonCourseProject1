@@ -1,7 +1,7 @@
+from PyQt5.QtWidgets import QMenuBar
 from file_menu import FileMenu
 from edit_menu import EditMenu
 from view_menu import ViewMenu
-from PyQt5.QtWidgets import QMenuBar
 
 
 class MenuBar(QMenuBar):

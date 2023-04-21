@@ -1,7 +1,7 @@
+import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from menu_bar import MenuBar
-import sys
 
 
 class Window(QMainWindow):
