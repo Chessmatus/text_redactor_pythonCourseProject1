@@ -2,20 +2,20 @@
 
 Текстовый редактор - базовый текстовый редактор.
 
-![Интерфейс приложения](https://github.com/Chessmatus/project_01/blob/dev/screenshot.png)  
+![Интерфейс приложения](https://github.com/Chessmatus/project_01/blob/dev/img/screenshot.png)  
 
 1. Возможности:
    * Открывать, редактировать, сохранять текстовые файлы.
    
-![Open file](https://github.com/Chessmatus/project_01/blob/dev/screenshot_1.png) 
+![Open file](https://github.com/Chessmatus/project_01/blob/dev/img/screenshot_1.png) 
 
    * Выполнять копирование, вставку, поиск и поиск с заменой по тексту.
    
-![Интерфейс приложения](https://github.com/Chessmatus/project_01/blob/dev/screenshot_2.png) 
+![Интерфейс приложения](https://github.com/Chessmatus/project_01/blob/dev/img/screenshot_2.png) 
 
    * Менять цвет, фон текста. Доступные цвета: белый, черный, серый, желтый, красный, синий, зеленый. Также можно менять общий фон. Доступные цвета: белый, черный.
 
-![Интерфейс приложения](https://github.com/Chessmatus/project_01/blob/dev/screenshot_3.png) 
+![Интерфейс приложения](https://github.com/Chessmatus/project_01/blob/dev/img/screenshot_3.png) 
 
 2. Запуск приложения:
 
